@@ -4,24 +4,20 @@
 
 using namespace std;
 
-// ============================================================================
-// STRUCTS (DEFINICI”N DE NODOS DIN¡MICOS)
-// ============================================================================
-
 // Nodo para el Gestor de Procesos y Planificador de CPU (Lista Enlazada y Cola de Prioridad)
 struct NodoProceso {
     int id;
     string nombre;
-    int priority; // Cambiado un poco el nombre para evitar conflictos: 3: Alta (Emergencia), 2: Media (OperaciÛn), 1: Baja (Rutina)
+    int priority; // Cambiado un poco el nombre para evitar conflictos: 3: Alta (Emergencia), 2: Media (Operaci√≥n), 1: Baja (Rutina)
     int memoria;   // Memoria requerida en MB
     NodoProceso* siguiente;
 };
 
-// Nodo para el Gestor de Memoria (Pila Din·mica - Stack)
+// Nodo para el Gestor de Memoria (Pila Din√°mica - Stack)
 struct NodoBloqueMemoria {
     int idProcesoAsignado;
     int cantidadMemoria;
-    NodoBloqueMemoria* anterior; // Enlace inverso cl·sico de pilas
+    NodoBloqueMemoria* anterior; // Enlace inverso cl√°sico de pilas
 };
 
 // ============================================================================
@@ -32,7 +28,7 @@ NodoProceso* colaCPU = NULL;       // Frente de la Cola de Prioridad
 NodoBloqueMemoria* topeMemoria = NULL; // Tope de la Pila de RAM
 int ramTotalConsumida = 0;             // Contador auxiliar de uso de RAM
 
-// FunciÛn auxiliar para convertir int a string compatible con C++ antiguo sin usar std::to_string
+// Funci√≥n auxiliar para convertir int a string compatible con C++ antiguo sin usar std::to_string
 string convertirEnteroAString(int numero) {
     stringstream ss;
     ss << numero;
@@ -40,7 +36,7 @@ string convertirEnteroAString(int numero) {
 }
 
 // ============================================================================
-// COMPONENTE 3: GESTOR DE MEMORIA (PILA DIN¡MICA - COMPLEJIDAD O(1))
+// COMPONENTE 3: GESTOR DE MEMORIA (PILA DIN√ÅMICA - COMPLEJIDAD O(1))
 // ============================================================================
 
 void pushMemoria(int idProceso, int cantidad) {
@@ -93,7 +89,7 @@ void verificarEstadoMemoria() {
 }
 
 // ============================================================================
-// COMPONENTE 2: PLANIFICADOR DE CPU (COLA DE PRIORIDAD DIN¡MICA)
+// COMPONENTE 2: PLANIFICADOR DE CPU (COLA DE PRIORIDAD DIN√ÅMICA)
 // ============================================================================
 
 void encolarPorPrioridad(int id, string nombre, int prioridad, int memoria) {
@@ -127,7 +123,7 @@ void desencolarCPU() {
     NodoProceso* procesoDespachado = colaCPU;
     colaCPU = colaCPU->siguiente;
     
-    cout << "\n>>> [EJECUCI”N] El procesador est· ejecutando la tarea: " << procesoDespachado->nombre << endl;
+    cout << "\n>>> [EJECUCI√ìN] El procesador est√° ejecutando la tarea: " << procesoDespachado->nombre << endl;
     cout << "    ID: " << procesoDespachado->id << " | Prioridad: " << procesoDespachado->priority << endl;
     
     popMemoria();
@@ -140,7 +136,7 @@ void visualizarColaActual() {
     cout << "=============================================" << endl;
     
     if (colaCPU == NULL) {
-        cout << "-> Planificador vacÌo. No hay tareas en cola." << endl;
+        cout << "-> Planificador vac√≠o. No hay tareas en cola." << endl;
         return;
     }
     
@@ -148,7 +144,7 @@ void visualizarColaActual() {
     int posicion = 1;
     while (temp != NULL) {
         string descPrioridad = (temp->priority == 3) ? "ALTA (Emergencia)" : 
-                               (temp->priority == 2) ? "MEDIA (OperaciÛn)" : "BAJA (Rutina)";
+                               (temp->priority == 2) ? "MEDIA (Operaci√≥n)" : "BAJA (Rutina)";
                                
         cout << posicion << ". [" << descPrioridad << "] Tarea: " << temp->nombre 
              << " (ID: " << temp->id << " | RAM: " << temp->memoria << " MB)" << endl;
@@ -188,7 +184,7 @@ void insertarProcesoLista(int id, string nombre, int prioridad, int memoria) {
     NodoProceso* temp = listaPrincipal;
     while (temp != NULL) {
         if (temp->id == id) {
-            cout << "[Error] El ID " << id << " ya est· asignado a otra tarea activa." << endl;
+            cout << "[Error] El ID " << id << " ya est√° asignado a otra tarea activa." << endl;
             return;
         }
         temp = temp->siguiente;
@@ -206,12 +202,12 @@ void insertarProcesoLista(int id, string nombre, int prioridad, int memoria) {
     pushMemoria(id, memoria);                     
     encolarPorPrioridad(id, nombre, prioridad, memoria); 
     
-    cout << "[REGISTRO] Tarea '" << nombre << "' agregada con Èxito al sistema." << endl;
+    cout << "[REGISTRO] Tarea '" << nombre << "' agregada con √©xito al sistema." << endl;
 }
 
 void buscarProceso(string criterio, bool esId) {
     if (listaPrincipal == NULL) {
-        cout << "[Historial] El registro base de procesos est· vacÌo." << endl;
+        cout << "[Historial] El registro base de procesos est√° vac√≠o." << endl;
         return;
     }
     
@@ -221,7 +217,7 @@ void buscarProceso(string criterio, bool esId) {
     while (temp != NULL) {
         if ((esId && convertirEnteroAString(temp->id) == criterio) || (!esId && temp->nombre == criterio)) {
             string descPrioridad = (temp->priority == 3) ? "ALTA (Emergencia)" : 
-                                   (temp->priority == 2) ? "MEDIA (OperaciÛn)" : "BAJA (Rutina)";
+                                   (temp->priority == 2) ? "MEDIA (Operaci√≥n)" : "BAJA (Rutina)";
             cout << "\n--- Proceso Localizado ---" << endl;
             cout << "ID: " << temp->id << endl;
             cout << "Nombre: " << temp->nombre << endl;
@@ -233,7 +229,7 @@ void buscarProceso(string criterio, bool esId) {
         temp = temp->siguiente;
     }
     if (!encontrado) {
-        cout << "No se encontrÛ ning˙n proceso que coincida con el criterio de b˙squeda." << endl;
+        cout << "No se encontr√≥ ning√∫n proceso que coincida con el criterio de b√∫squeda." << endl;
     }
 }
 
@@ -259,7 +255,7 @@ void modificarPrioridadDeProceso(int idBuscar, int nuevaPrioridad) {
         encolarPorPrioridad(idBuscar, nombreProceso, nuevaPrioridad, memoriaProceso);
         cout << "[SISTEMA] Prioridad del proceso ID " << idBuscar << " modificada. Cola de CPU reorganizada." << endl;
     } else {
-        cout << "[Error] El ID solicitado no est· registrado en el dron." << endl;
+        cout << "[Error] El ID solicitado no est√° registrado en el dron." << endl;
     }
 }
 
@@ -289,7 +285,7 @@ void eliminarProcesoLista(int idBuscar) {
         cout << "[SISTEMA] Proceso ID " << idBuscar << " eliminado del sistema." << endl;
         delete actual;
     } else {
-        cout << "[Error] No se encontrÛ el proceso con ID " << idBuscar << " en el registro." << endl;
+        cout << "[Error] No se encontr√≥ el proceso con ID " << idBuscar << " en el registro." << endl;
     }
 }
 
