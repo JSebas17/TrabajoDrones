@@ -3,6 +3,7 @@
 #include <sstream> // Necesario para to_string alternativo en C++ antiguo
 
 using namespace std;
+const int MAX_PROCESOS = 100;
 
 // Nodo para el Gestor de Procesos y Planificador de CPU (Lista Enlazada y Cola de Prioridad)
 struct NodoProceso {
@@ -80,6 +81,39 @@ void verificarEstadoMemoria() {
     cout << "=============================================" << endl;
 }
 
+void aplicarBurbujaEnCola() {
+    if (colaCPU == NULL || colaCPU->siguiente == NULL) return;
+    bool intercambiado;
+    NodoProceso* actual;
+    NodoProceso* ultimoCambiado = NULL;
+    do {
+        intercambiado = false;
+        actual = colaCPU;
+        while (actual->siguiente != ultimoCambiado) {
+            if (actual->priority < actual->siguiente->priority) {
+                // Intercambio de valores internos usando Burbuja
+                int tempId = actual->id;
+                string tempNombre = actual->nombre;
+                int tempPriority = actual->priority;
+                int tempMemoria = actual->memoria;
+
+                actual->id = actual->siguiente->id;
+                actual->nombre = actual->siguiente->nombre;
+                actual->priority = actual->siguiente->priority;
+                actual->memoria = actual->siguiente->memoria;
+
+                actual->siguiente->id = tempId;
+                actual->siguiente->nombre = tempNombre;
+                actual->siguiente->priority = tempPriority;
+                actual->siguiente->memoria = tempMemoria;
+                intercambiado = true;
+            }
+            actual = actual->siguiente;
+        }
+        ultimoCambiado = actual;
+    } while (intercambiado);
+}
+
 void encolarPorPrioridad(int id, string nombre, int prioridad, int memoria) {
     NodoProceso* nuevoNodo = new NodoProceso();
     nuevoNodo->id = id;
@@ -88,18 +122,16 @@ void encolarPorPrioridad(int id, string nombre, int prioridad, int memoria) {
     nuevoNodo->memoria = memoria;
     nuevoNodo->siguiente = NULL;
     
-    if (colaCPU == NULL || prioridad > colaCPU->priority) {
-        nuevoNodo->siguiente = colaCPU;
+    if (colaCPU == NULL) {
         colaCPU = nuevoNodo;
-    } 
-    else {
+    } else {
         NodoProceso* temp = colaCPU;
-        while (temp->siguiente != NULL && temp->siguiente->priority >= prioridad) {
+        while (temp->siguiente != NULL) {
             temp = temp->siguiente;
         }
-        nuevoNodo->siguiente = temp->siguiente;
         temp->siguiente = nuevoNodo;
     }
+    aplicarBurbujaEnCola(); // Aplica ordenamiento burbuja aquí
 }
 
 void desencolarCPU() {
@@ -189,20 +221,64 @@ void insertarProcesoLista(int id, string nombre, int prioridad, int memoria) {
     cout << "[REGISTRO] Tarea '" << nombre << "' agregada con éxito al sistema." << endl;
 }
 
-void buscarProceso(string criterio, bool esId) {
+void buscarProcesoPorBinaria(int idBuscar) {
     if (listaPrincipal == NULL) {
-        cout << "[Historial] El registro base de procesos está vacío." << endl;
+        cout << "[Historial] El registro base de procesos esta vacio." << endl;
         return;
     }
-    
+    NodoProceso* arregloAux[MAX_PROCESOS];
+    int tamano = 0;
+    NodoProceso* temp = listaPrincipal;
+    while (temp != NULL && tamano < MAX_PROCESOS) {
+        arregloAux[tamano] = temp;
+        tamano++;
+        temp = temp->siguiente;
+    }
+    // Ordena el arreglo temporal con burbuja para poder hacer la binaria
+    for (int i = 0; i < tamano - 1; i++) {
+        for (int j = 0; j < tamano - i - 1; j++) {
+            if (arregloAux[j]->id > arregloAux[j+1]->id) {
+                NodoProceso* t = arregloAux[j];
+                arregloAux[j] = arregloAux[j+1];
+                arregloAux[j+1] = t;
+            }
+        }
+    }
+    // ALGORITMO DE BÚSQUEDA BINARIA
+    int izquierda = 0;
+    int derecha = tamano - 1;
+    int posicionEncontrada = -1;
+    while (izquierda <= derecha) {
+        int medio = izquierda + (derecha - izquierda) / 2;
+        if (arregloAux[medio]->id == idBuscar) {
+            posicionEncontrada = medio;
+            break;
+        }
+        if (arregloAux[medio]->id < idBuscar) izquierda = medio + 1;
+        else derecha = medio - 1;
+    }
+    if (posicionEncontrada != -1) {
+        NodoProceso* encontrado = arregloAux[posicionEncontrada];
+        string descPrioridad = (encontrado->priority == 3) ? "ALTA (Emergencia)" : 
+                               (encontrado->priority == 2) ? "MEDIA (Operacion)" : "BAJA (Rutina)";
+        cout << "\n--- Proceso Localizado (Mediante Busqueda Binaria) ---" << endl;
+        cout << "ID: " << encontrado->id << endl;
+        cout << "Nombre: " << encontrado->nombre << endl;
+        cout << "Prioridad: " << descPrioridad << endl;
+        cout << "Memoria RAM: " << encontrado->memoria << " MB" << endl;
+    } else {
+        cout << "No se encontro ningun proceso con el ID " << idBuscar << " usando Busqueda Binaria." << endl;
+    }
+}
+
+void buscarProcesoPorNombreSecuencial(string nombreBuscar) {
     NodoProceso* temp = listaPrincipal;
     bool encontrado = false;
-    
     while (temp != NULL) {
-        if ((esId && convertirEnteroAString(temp->id) == criterio) || (!esId && temp->nombre == criterio)) {
+        if (temp->nombre == nombreBuscar) {
             string descPrioridad = (temp->priority == 3) ? "ALTA (Emergencia)" : 
-                                   (temp->priority == 2) ? "MEDIA (Operación)" : "BAJA (Rutina)";
-            cout << "\n--- Proceso Localizado ---" << endl;
+                                   (temp->priority == 2) ? "MEDIA (Operacion)" : "BAJA (Rutina)";
+            cout << "\n--- Proceso Localizado (Secuencial por Nombre) ---" << endl;
             cout << "ID: " << temp->id << endl;
             cout << "Nombre: " << temp->nombre << endl;
             cout << "Prioridad: " << descPrioridad << endl;
@@ -212,11 +288,8 @@ void buscarProceso(string criterio, bool esId) {
         }
         temp = temp->siguiente;
     }
-    if (!encontrado) {
-        cout << "No se encontró ningún proceso que coincida con el criterio de búsqueda." << endl;
-    }
+    if (!encontrado) cout << "No se encontro la tarea con el nombre: " << nombreBuscar << endl;
 }
-
 void modificarPrioridadDeProceso(int idBuscar, int nuevaPrioridad) {
     NodoProceso* temp = listaPrincipal;
     bool encontrado = false;
@@ -330,13 +403,13 @@ int main() {
             }
             case 3: {
                 int subOpcion;
-                cout << "Buscar por: 1) ID  2) Nombre: "; cin >> subOpcion;
+                cout << "Buscar por: 1) ID (Busqueda Binaria)  2) Nombre (Secuencial): "; cin >> subOpcion;
                 if (subOpcion == 1) {
-                    string idB; cout << "Ingrese ID: "; cin >> idB;
-                    buscarProceso(idB, true);
+                    int idB; cout << "Ingrese ID numerico a buscar: "; cin >> idB;
+                    buscarProcesoPorBinaria(idB); // Llama a la binaria
                 } else {
-                    string nomB; cout << "Ingrese Nombre: "; cin >> nomB;
-                    buscarProceso(nomB, false);
+                    string nomB; cout << "Ingrese Nombre exacto: "; cin >> nomB;
+                    buscarProcesoPorNombreSecuencial(nomB);
                 }
                 break;
             }
