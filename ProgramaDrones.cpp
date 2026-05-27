@@ -20,9 +20,6 @@ struct NodoBloqueMemoria {
     NodoBloqueMemoria* anterior; // Enlace inverso clásico de pilas
 };
 
-// ============================================================================
-// VARIABLES GLOBALES (PUNTEROS DE CONTROL USANDO NULL)
-// ============================================================================
 NodoProceso* listaPrincipal = NULL; // Cabeza del Historial Global
 NodoProceso* colaCPU = NULL;       // Frente de la Cola de Prioridad
 NodoBloqueMemoria* topeMemoria = NULL; // Tope de la Pila de RAM
@@ -35,9 +32,6 @@ string convertirEnteroAString(int numero) {
     return ss.str();
 }
 
-// ============================================================================
-// COMPONENTE 3: GESTOR DE MEMORIA (PILA DINÁMICA - COMPLEJIDAD O(1))
-// ============================================================================
 
 void pushMemoria(int idProceso, int cantidad) {
     NodoBloqueMemoria* nuevoBloque = new NodoBloqueMemoria();
@@ -68,9 +62,7 @@ void popMemoria() {
 }
 
 void verificarEstadoMemoria() {
-    cout << "\n=============================================" << endl;
     cout << "      ESTADO DE LA MEMORIA RAM DEL DRON      " << endl;
-    cout << "=============================================" << endl;
     cout << "Memoria RAM Total en Uso: " << ramTotalConsumida << " MB" << endl;
     
     if (topeMemoria == NULL) {
@@ -87,10 +79,6 @@ void verificarEstadoMemoria() {
     }
     cout << "=============================================" << endl;
 }
-
-// ============================================================================
-// COMPONENTE 2: PLANIFICADOR DE CPU (COLA DE PRIORIDAD DINÁMICA)
-// ============================================================================
 
 void encolarPorPrioridad(int id, string nombre, int prioridad, int memoria) {
     NodoProceso* nuevoNodo = new NodoProceso();
@@ -175,10 +163,6 @@ void eliminarDeColaCpuPorId(int id) {
         temp = temp->siguiente;
     }
 }
-
-// ============================================================================
-// COMPONENTE 1: GESTOR DE PROCESOS (LISTA ENLAZADA SIMPLE)
-// ============================================================================
 
 void insertarProcesoLista(int id, string nombre, int prioridad, int memoria) {
     NodoProceso* temp = listaPrincipal;
@@ -290,9 +274,7 @@ void eliminarProcesoLista(int idBuscar) {
 }
 
 void mostrarInventarioGlobal() {
-    cout << "\n=============================================" << endl;
     cout << "       INVENTARIO GENERAL DE PROCESOS        " << endl;
-    cout << "=============================================" << endl;
     if (listaPrincipal == NULL) {
         cout << "-> No hay procesos registrados en el historial general." << endl;
         return;
@@ -306,9 +288,6 @@ void mostrarInventarioGlobal() {
     cout << "=============================================" << endl;
 }
 
-// ============================================================================
-// MENU INTERACTIVO DE USUARIO
-// ============================================================================
 int main() {
     int opcion;
     
@@ -320,14 +299,14 @@ int main() {
         cout << "\n=======================================================" << endl;
         cout << "   SISTEMA OPERATIVO EXPERIMENTAL - DRON DE RESCATE   " << endl;
         cout << "=======================================================" << endl;
-        cout << "1. [GESTOR] Registrar Nueva Tarea (Insercion)" << endl;
-        cout << "2. [GESTOR] Eliminar / Abortar Tarea" << endl;
-        cout << "3. [GESTOR] Buscar Tarea por ID o Nombre" << endl;
-        cout << "4. [GESTOR] Cambiar Prioridad de una Tarea" << endl;
-        cout << "5. [PLANIFICADOR] Visualizar Cola de Prioridad del CPU" << endl;
-        cout << "6. [PLANIFICADOR] Despachar y Ejecutar Siguiente Tarea Critica" << endl;
-        cout << "7. [MEMORIA] Verificar Estado Actual del Stack de RAM" << endl;
-        cout << "8. [VER] Mostrar Inventario Historico Completo" << endl;
+        cout << "1. Registrar Nueva Tarea (Insercion)" << endl;
+        cout << "2. Eliminar / Abortar Tarea" << endl;
+        cout << "3. Buscar Tarea por ID o Nombre" << endl;
+        cout << "4. Cambiar Prioridad de una Tarea" << endl;
+        cout << "5. Visualizar Cola de Prioridad del CPU" << endl;
+        cout << "6. Despachar y Ejecutar Siguiente Tarea Critica" << endl;
+        cout << "7. Verificar Estado Actual del Stack de RAM" << endl;
+        cout << "8. Mostrar Inventario Historico Completo" << endl;
         cout << "9. Salir de la Simulacion de Vuelo" << endl;
         cout << "Seleccione una opcion (1-9): ";
         cin >> opcion;
