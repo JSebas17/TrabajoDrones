@@ -290,10 +290,6 @@ void mostrarInventarioGlobal() {
 
 int main() {
     int opcion;
-    
-    insertarProcesoLista(101, "Enviar_Telemetria", 1, 12);
-    insertarProcesoLista(102, "Evasion_Obstaculo", 3, 32);
-    insertarProcesoLista(103, "Estabilizar_Motores", 2, 20);
 
     do {
         cout << "\n=======================================================" << endl;
