@@ -383,7 +383,6 @@ void guardarDatosEnArchivo() {
     }
     
     archivo.close();
-    cout << "[SISTEMA] Datos de vuelo guardados exitosamente en 'procesos_dron.txt'." << endl;
 }
 
 // 2. FUNCIÓN PARA CARGAR LOS DATOS DESDE EL ARCHIVO TXT
@@ -423,8 +422,8 @@ void cargarDatosDesdeArchivo() {
     }
     
     archivo.close();
-    cout << "[SISTEMA] Telemetria y procesos restaurados con exito desde el disco." << endl;
 }
+
 
 int main() {
     int opcion;
@@ -445,6 +444,7 @@ int main() {
         cout << "8. Mostrar Inventario Historico Completo" << endl;
         cout << "9. Salir de la Simulacion de Vuelo" << endl;
         cout << "Seleccione una opcion (1-9): ";
+        
         if (!(cin >> opcion)) { 
             cout << "\n[ALERTA] Entrada invalida. Por favor, ingrese un NUMERO entre 1 y 9." << endl;
             cin.clear(); // Resetea el estado de error de cin
@@ -452,6 +452,7 @@ int main() {
             opcion = 0; // Asigna un valor neutro para forzar a que repita el bucle limpiamente
             continue; 
         }
+        
         switch(opcion) {
             case 1: {
                 int id, prio, mem;
