@@ -487,11 +487,6 @@ int main() {
                 insertarProcesoLista(id, nom, prio, mem);
                 break;
             }
-                }
-                cout << "Ingrese Memoria requerida (MB): "; cin >> mem;
-                insertarProcesoLista(id, nom, prio, mem);
-                break;
-            }
             case 2: {
                 int id;
                 cout << "Ingrese el ID de la tarea a eliminar: "; cin >> id;
