@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <sstream> // Necesario para to_string alternativo en C++ antiguo
+#include <fstream> // Agrega esto para leer y escribir archivos
 
 using namespace std;
 const int MAX_PROCESOS = 100;
@@ -361,8 +362,74 @@ void mostrarInventarioGlobal() {
     cout << "=============================================" << endl;
 }
 
+// 1. FUNCIÓN PARA GUARDAR LOS DATOS EN UN ARCHIVO TXT
+void guardarDatosEnArchivo() {
+    // Abrimos el archivo en modo escritura (output file stream)
+    ofstream archivo("procesos_dron.txt");
+    
+    if (!archivo.is_open()) {
+        cout << "[ERROR] No se pudo abrir el archivo para guardar los datos." << endl;
+        return;
+    }
+    
+    NodoProceso* temp = listaPrincipal;
+    // Recorremos la lista guardando un proceso por cada línea, separado por comas
+    while (temp != NULL) {
+        archivo << temp->id << ","
+                << temp->nombre << ","
+                << temp->priority << ","
+                << temp->memoria << "\n";
+        temp = temp->siguiente;
+    }
+    
+    archivo.close();
+    cout << "[SISTEMA] Datos de vuelo guardados exitosamente en 'procesos_dron.txt'." << endl;
+}
+
+// 2. FUNCIÓN PARA CARGAR LOS DATOS DESDE EL ARCHIVO TXT
+// VERSION COMPATIBLE DE CARGA DE DATOS (SIN USAR STOI)
+void cargarDatosDesdeArchivo() {
+    ifstream archivo("procesos_dron.txt");
+    
+    if (!archivo.is_open()) {
+        cout << "[SISTEMA] No se encontro un respaldo previo. Iniciando sistema limpio." << endl;
+        return;
+    }
+    
+    int id, prio, mem;
+    string nom;
+    string linea;
+    
+    while (getline(archivo, linea)) {
+        if (linea.empty()) continue;
+        
+        stringstream ss(linea);
+        string token;
+        
+        // Usamos variables stream intermedias para transformar texto a entero de forma clasica
+        getline(ss, token, ','); 
+        stringstream convId(token); convId >> id;
+        
+        getline(ss, nom, ',');
+        
+        getline(ss, token, ','); 
+        stringstream convPrio(token); convPrio >> prio;
+        
+        getline(ss, token, ','); 
+        stringstream convMem(token); convMem >> mem;
+        
+        // Insertamos en el sistema de manera segura
+        insertarProcesoLista(id, nom, prio, mem);
+    }
+    
+    archivo.close();
+    cout << "[SISTEMA] Telemetria y procesos restaurados con exito desde el disco." << endl;
+}
+
 int main() {
     int opcion;
+    
+    cargarDatosDesdeArchivo();
 
     do {
         cout << "\n=======================================================" << endl;
@@ -378,18 +445,48 @@ int main() {
         cout << "8. Mostrar Inventario Historico Completo" << endl;
         cout << "9. Salir de la Simulacion de Vuelo" << endl;
         cout << "Seleccione una opcion (1-9): ";
-        cin >> opcion;
-
+        if (!(cin >> opcion)) { 
+            cout << "\n[ALERTA] Entrada invalida. Por favor, ingrese un NUMERO entre 1 y 9." << endl;
+            cin.clear(); // Resetea el estado de error de cin
+            cin.ignore(10000, '\n'); // Descarta las letras basura que causan el bucle
+            opcion = 0; // Asigna un valor neutro para forzar a que repita el bucle limpiamente
+            continue; 
+        }
         switch(opcion) {
             case 1: {
                 int id, prio, mem;
                 string nom;
-                cout << "Ingrese ID de la tarea: "; cin >> id;
-                cout << "Ingrese Nombre (sin espacios): "; cin >> nom;
-                cout << "Ingrese Prioridad (3:Alta, 2:Media, 1:Baja): "; cin >> prio;
-                if (prio < 1 || prio > 3) {
-                    cout << "Prioridad invalida. Operacion cancelada." << endl;
-                    break;
+                
+                // Validación para el ID
+                cout << "Ingrese ID de la tarea: "; 
+                while (!(cin >> id)) {
+                    cout << "[Error] El ID debe ser un numero entero. Intente de nuevo: ";
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                }
+                
+                cout << "Ingrese Nombre (sin espacios): "; 
+                cin >> nom;
+                
+                // Validación para la Prioridad
+                cout << "Ingrese Prioridad (3:Alta, 2:Media, 1:Baja): "; 
+                while (!(cin >> prio) || prio < 1 || prio > 3) {
+                    cout << "[Error] Prioridad invalida. Debe ser 1, 2 o 3. Intente de nuevo: ";
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                }
+                
+                // Validación para la Memoria
+                cout << "Ingrese Memoria requerida (MB): "; 
+                while (!(cin >> mem) || mem <= 0) {
+                    cout << "[Error] La cantidad de memoria debe ser un numero positivo. Intente de nuevo: ";
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                }
+                
+                insertarProcesoLista(id, nom, prio, mem);
+                break;
+            }
                 }
                 cout << "Ingrese Memoria requerida (MB): "; cin >> mem;
                 insertarProcesoLista(id, nom, prio, mem);
@@ -437,7 +534,8 @@ int main() {
                 mostrarInventarioGlobal();
                 break;
             case 9:
-                cout << "Simulacion finalizada. Descargando telemetria y apagando dron..." << endl;
+                guardarDatosEnArchivo(); 
+                cout << "Simulacion finalizada. Apagando dron..." << endl;
                 break;
             default:
                 cout << "Opcion no valida. Intente de nuevo." << endl;
